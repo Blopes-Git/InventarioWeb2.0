@@ -10,16 +10,28 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Log start of build
+        run: echo "Starting build process..."
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.0.x' # Use your project's .NET version
 
-      - name: Build e Publish
-        run: dotnet publish -c Release -o ./publish
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Log build finished
+        run: echo "Build finished successfully!"
+
+      - name: Publish
+        run: dotnet publish --configuration Release -o ./publish
+
+      - name: Log publish finished
+        run: echo "Publish finished successfully!"
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4
@@ -28,3 +40,10 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./publish
+
+      - name: Log deploy finished
+        run: echo "Deploy finished successfully!"
+
+      - name: Custom failure message
+        if: failure()
+        run: echo "❌ The workflow failed. Please check the logs above for details."
